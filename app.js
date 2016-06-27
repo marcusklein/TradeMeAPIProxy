@@ -23,19 +23,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const apiUrl = 'https://api.tmsandbox.co.nz'; // change this if needed
-const consumerKey = 'add your consumer key here';
-const oauthSignature = 'add your oath sig here';
-
+const apiUrl = process.env.API_URL || 'https://api.tmsandbox.co.nz'; // change this if needed
+const consumerKey = process.env.CONSUMER_KEY || 'add your consumer key here';
+const oauthSignature = process.env.OAUTH_SIGNATURE || 'add your oath sig here';
 
 app.get('*', function(req, res){
+  console.log("starting");
+  console.log(`${apiUrl} ${consumerKey} ${oauthSignature}`);
 
   var userReq = req.originalUrl;
-
-  if (!userReq || userReq === '/') {
-    res.statusCode(404);
-    next();
-  }
 
   var url = `${apiUrl}${userReq}`;
 
@@ -49,13 +45,12 @@ app.get('*', function(req, res){
 
   function callback(error, response, body) {
     if (!error && response.statusCode == 200) {
-      var info = JSON.parse(body);
-
-      res.send(info);
+      var data = JSON.parse(body);
+      res.send(data);
     } else if (error) {
       console.error(error);
     } else {
-      console.log(response.statusCode);
+      res.send(body);
     }
   }
 
